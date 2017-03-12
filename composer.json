@@ -1,0 +1,27 @@
+{
+  "name": "gephart/routing",
+  "type": "library",
+  "description": "Gephart Routing Component",
+  "keywords": [],
+  "homepage": "https://github.com/gephart/routing",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michal Katuščák",
+      "email": "michal@katuscak.cz"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "gephart/annotation": "dev-master",
+    "gephart/configuration": "dev-master",
+    "gephart/dependency-injection": "dev-master",
+    "gephart/request": "dev-master"
+  },
+  "autoload": {
+    "psr-4": { "Gephart\\Routing\\": "src/" },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  }
+}
