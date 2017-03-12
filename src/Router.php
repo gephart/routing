@@ -61,7 +61,7 @@ class Router
         $this->routes[] = $route;
     }
 
-    public function run(): void
+    public function run()
     {
         $_route = $this->request->get("_route") ?: "/";
 
@@ -145,7 +145,7 @@ class Router
         throw new NotFoundRouteException("Router: Not found route.");
     }
 
-    private function autoload(string $autoload): void
+    private function autoload(string $autoload)
     {
         $dir = $this->routing_configuration->getDirectory() . "/../" . $autoload;
 
@@ -165,7 +165,7 @@ class Router
         }
     }
 
-    private function addRouteFromAnnotation($controller_name, $action_name): void
+    private function addRouteFromAnnotation($controller_name, $action_name)
     {
         $prefix = $this->annotation_reader->get("RoutePrefix", $controller_name);
         $route_data = $this->annotation_reader->get("Route", $controller_name, $action_name);
@@ -209,7 +209,7 @@ class Router
         });
     }
 
-    private function loadControllers($dir): void
+    private function loadControllers($dir)
     {
         if ($handle = opendir($dir)) {
             while (false !== ($entry = readdir($handle))) {
