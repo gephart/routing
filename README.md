@@ -1,7 +1,7 @@
 Gephart Routing
 ===
 
-[![Build Status](https://travis-ci.org/gephart/configuration.svg?branch=master)](https://travis-ci.org/gephart/configuration)
+[![Build Status](https://travis-ci.org/gephart/routing.svg?branch=master)](https://travis-ci.org/gephart/routing)
 
 Dependencies
 ---

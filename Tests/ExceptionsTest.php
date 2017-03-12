@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-class ExceptionsTest extends \PHPUnit_Framework_TestCase
+class ExceptionsTest extends \PHPUnit\Framework\TestCase
 {
     private $container;
 
