@@ -90,7 +90,7 @@ class Router
             function ($matches) use (&$parameters, $route_name) {
                 $match = $matches[1];
                 if (empty($parameters[$match])) {
-                    throw new RouterException("Router: Route '$route_name' needed '$match'")
+                    throw new RouterException("Router: Route '$route_name' needed '$match'");
                 }
                 $parameter = $parameters[$match];
                 unset($parameters[$match]);

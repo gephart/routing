@@ -24,7 +24,7 @@ class ExceptionsTest extends \PHPUnit\Framework\TestCase
             $router->run();
         } catch (\Gephart\Routing\Exception\NotFoundRouteException $e) {
             $caught = true;
-        } catch (Exception $e) {die($e->getMessage());}
+        } catch (Exception $e) {die($e->getMessage())}
 
         $this->assertTrue($caught);
     }
