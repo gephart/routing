@@ -78,7 +78,13 @@ class Router
         $parameters_bag = $this->getParametersBag($values, $controller_name, $action_name);
 
         $controller = $this->container->get($controller_name);
-        $controller->$action_name(...$parameters_bag);
+        $response = $controller->$action_name(...$parameters_bag);
+
+        if (is_string($response)) {
+            echo $response;
+        } elseif ($response instanceof ReponseInterface) {
+            $response->render();
+        }
     }
 
     public function generateUrl(string $route_name, array $parameters = []): string
