@@ -5,6 +5,7 @@ namespace Gephart\Routing;
 use Gephart\Annotation\Reader;
 use Gephart\DependencyInjection\Container;
 use Gephart\Request\Request;
+use Gephart\Response\ResponseInterface;
 use Gephart\Routing\Configuration\RoutingConfiguration;
 use Gephart\Routing\Exception\NotFoundRouteException;
 use Gephart\Routing\Exception\NotValidRouteException;
@@ -82,7 +83,7 @@ class Router
 
         if (is_string($response)) {
             echo $response;
-        } elseif ($response instanceof ReponseInterface) {
+        } elseif ($response instanceof ResponseInterface) {
             $response->render();
         }
     }
