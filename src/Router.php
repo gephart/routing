@@ -62,6 +62,11 @@ class Router
         $this->routes[] = $route;
     }
 
+    public function getRoutes(): RouteCollection
+    {
+        return $this->routes;
+    }
+
     public function run()
     {
         $_route = $this->request->get("_route") ?: "/";

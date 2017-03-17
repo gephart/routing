@@ -51,6 +51,5 @@ class RouterTest extends \PHPUnit\Framework\TestCase
         $expected_url = "/admin/article/post?id=21";
 
         $this->assertTrue($url === $expected_url);
-
     }
 }
