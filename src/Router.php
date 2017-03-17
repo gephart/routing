@@ -4,6 +4,8 @@ namespace Gephart\Routing;
 
 use Gephart\Annotation\Reader;
 use Gephart\DependencyInjection\Container;
+use Gephart\EventManager\Event;
+use Gephart\EventManager\EventManager;
 use Gephart\Request\Request;
 use Gephart\Response\ResponseInterface;
 use Gephart\Routing\Configuration\RoutingConfiguration;
@@ -13,6 +15,8 @@ use Gephart\Routing\Exception\RouterException;
 
 class Router
 {
+
+    public const REQUEST_RENDER_EVENT = "router__request_render";
 
     /**
      * @var RoutingConfiguration
@@ -39,11 +43,17 @@ class Router
      */
     private $routes;
 
+    /**
+     * @var EventManager
+     */
+    private $eventManager;
+
     public function __construct(
         RoutingConfiguration $routing_configuration,
         Container $container,
         Reader $annotation_reader,
-        Request $request
+        Request $request,
+        EventManager $eventManager
     )
     {
         $this->routing_configuration = $routing_configuration;
@@ -51,6 +61,7 @@ class Router
         $this->annotation_reader = $annotation_reader;
         $this->request = $request;
         $this->routes = new RouteCollection();
+        $this->eventManager = $eventManager;
     }
 
     public function addRoute(Route $route)
@@ -86,11 +97,19 @@ class Router
         $controller = $this->container->get($controller_name);
         $response = $controller->$action_name(...$parameters_bag);
 
-        if (is_string($response)) {
-            echo $response;
-        } elseif ($response instanceof ResponseInterface) {
-            $response->render();
+        if ($response instanceof ResponseInterface) {
+            $response = $response->render();
         }
+
+        $event = new Event();
+        $event->setName(self::REQUEST_RENDER_EVENT);
+        $event->setParams([
+            "response" => $response
+        ]);
+        $this->eventManager->trigger($event);
+        $response = $event->getParam("response");
+
+        echo $response;
     }
 
     public function generateUrl(string $route_name, array $parameters = []): string
