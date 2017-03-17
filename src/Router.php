@@ -16,7 +16,7 @@ use Gephart\Routing\Exception\RouterException;
 class Router
 {
 
-    public const REQUEST_RENDER_EVENT = "router__request_render";
+    const REQUEST_RENDER_EVENT = "router__request_render";
 
     /**
      * @var RoutingConfiguration
