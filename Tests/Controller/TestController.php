@@ -17,6 +17,6 @@ class TestController
      */
     public function index($limit, $offset, $slug)
     {
-        echo $slug . "-" . $limit . "-" . $offset;
+        return $slug . "-" . $limit . "-" . $offset;
     }
 }

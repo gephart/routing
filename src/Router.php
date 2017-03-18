@@ -2,7 +2,6 @@
 
 namespace Gephart\Routing;
 
-use Gephart\Annotation\Reader;
 use Gephart\DependencyInjection\Container;
 use Gephart\EventManager\Event;
 use Gephart\EventManager\EventManager;
@@ -12,6 +11,8 @@ use Gephart\Routing\Configuration\RoutingConfiguration;
 use Gephart\Routing\Exception\NotFoundRouteException;
 use Gephart\Routing\Exception\NotValidRouteException;
 use Gephart\Routing\Exception\RouterException;
+use Gephart\Routing\Generator\UrlGenerator;
+use Gephart\Routing\Loader\AnnotationLoader;
 
 class Router
 {
@@ -29,9 +30,9 @@ class Router
     private $container;
 
     /**
-     * @var Reader
+     * @var AnnotationLoader
      */
-    private $annotation_reader;
+    private $annotation_loader;
 
     /**
      * @var Request
@@ -46,22 +47,30 @@ class Router
     /**
      * @var EventManager
      */
-    private $eventManager;
+    private $event_manager;
+
+    /**
+     * @var UrlGenerator
+     */
+    private $url_generator;
 
     public function __construct(
         RoutingConfiguration $routing_configuration,
         Container $container,
-        Reader $annotation_reader,
+        AnnotationLoader $annotation_loader,
         Request $request,
-        EventManager $eventManager
+        EventManager $event_manager,
+        UrlGenerator $url_generator
     )
     {
         $this->routing_configuration = $routing_configuration;
         $this->container = $container;
-        $this->annotation_reader = $annotation_reader;
         $this->request = $request;
+        $this->event_manager = $event_manager;
+        $this->annotation_loader = $annotation_loader;
+        $this->url_generator = $url_generator;
+
         $this->routes = new RouteCollection();
-        $this->eventManager = $eventManager;
     }
 
     public function addRoute(Route $route)
@@ -73,9 +82,28 @@ class Router
         $this->routes[] = $route;
     }
 
+    public function addRoutes(RouteCollection $routes)
+    {
+        foreach ($routes as $route) {
+            $this->addRoute($route);
+        }
+    }
+
     public function getRoutes(): RouteCollection
     {
         return $this->routes;
+    }
+
+    public function getRoute(string $route_name): Route
+    {
+        /** @var Route $route */
+        foreach ($this->routes as $route) {
+            if ($route->getName() === $route_name) {
+                return $route;
+            }
+        }
+
+        throw new NotFoundRouteException("Router: Not found route '$route_name'.");
     }
 
     public function run()
@@ -92,22 +120,24 @@ class Router
         $controller_name = $route->getController();
         $action_name = $route->getAction();
 
-        $parameters_bag = $this->getParametersBag($values, $controller_name, $action_name);
+        $route_parameters = $this->getRouteParameters($values, $controller_name, $action_name);
 
         $controller = $this->container->get($controller_name);
-        $response = $controller->$action_name(...$parameters_bag);
+        $response = $controller->$action_name(...$route_parameters);
 
         if ($response instanceof ResponseInterface) {
             $response = $response->render();
         }
 
-        $event = new Event();
-        $event->setName(self::REQUEST_RENDER_EVENT);
-        $event->setParams([
+        $event = $this->triggerEvent(self::REQUEST_RENDER_EVENT, [
             "response" => $response
         ]);
-        $this->eventManager->trigger($event);
+
         $response = $event->getParam("response");
+
+        if (!is_string($response)) {
+            throw new RouterException("Router expected valid response from $controller_name::$action_name");
+        }
 
         echo $response;
     }
@@ -115,53 +145,37 @@ class Router
     public function generateUrl(string $route_name, array $parameters = []): string
     {
         $route = $this->getRoute($route_name);
-        $rule = $route->getRule();
-        $url = preg_replace_callback(
-            "|\{(\w+)\}|",
-            function ($matches) use (&$parameters, $route_name) {
-                $match = $matches[1];
-                if (empty($parameters[$match])) {
-                    throw new RouterException("Router: Route '$route_name' needed '$match'");
-                }
-                $parameter = $parameters[$match];
-                unset($parameters[$match]);
-                return $parameter;
-            },
-            $rule);
-
-        if (empty($parameters)) {
-            return $url;
-        }
-
-        return $url . "?" . http_build_query($parameters);
+        return $this->url_generator->generate($route, $parameters);
     }
 
-    private function getParametersBag(array $data, string $controller_name, string $action_name): array
+    private function triggerEvent(string $event_name, array $parameters = [])
+    {
+        $event = new Event();
+        $event->setName($event_name);
+        $event->setParams($parameters);
+
+        $this->event_manager->trigger($event);
+
+        return $event;
+    }
+
+    private function getRouteParameters(array $data, string $controller_name, string $action_name): array
     {
         $reflection_class = new \ReflectionClass($controller_name);
 
         $parameters = $reflection_class->getMethod($action_name)->getParameters();
-        $parameters_bag = [];
+        $route_parameters = [];
+
         foreach ($parameters as $parameter) {
             $parameter_name = $parameter->getName();
+
             if (empty($data[$parameter_name])) {
-                throw new RouterException("Unknown parameter '$parameter_name'");
+                throw new RouterException("Unknown parameter '$parameter_name' in $controller_name::$action_name");
             }
-            $parameters_bag[] = $data[$parameter_name];
-        }
-        return $parameters_bag;
-    }
 
-    private function getRoute(string $route_name): Route
-    {
-        /** @var Route $route */
-        foreach ($this->routes as $route) {
-            if ($route->getName() === $route_name) {
-                return $route;
-            }
+            $route_parameters[] = $data[$parameter_name];
         }
-
-        throw new NotFoundRouteException("Router: Not found route '$route_name'.");
+        return $route_parameters;
     }
 
     private function getMatchedRoute(string $_route): Route
@@ -184,76 +198,9 @@ class Router
             throw new RouterException("'$dir' is not directory.");
         }
 
-        $controllers = $this->getControllers($dir);
+        $routes = $this->annotation_loader->loadRoutesFromControllers($dir);
 
-        foreach ($controllers as $controller_name) {
-            $rc = new \ReflectionClass($controller_name);
-            foreach ($rc->getMethods() as $action) {
-                if ($action->isPublic()) {
-                    $this->addRouteFromAnnotation($controller_name, $action->name);
-                }
-            }
-        }
-    }
-
-    private function addRouteFromAnnotation($controller_name, $action_name)
-    {
-        $prefix = $this->annotation_reader->get("RoutePrefix", $controller_name);
-        $route_data = $this->annotation_reader->get("Route", $controller_name, $action_name);
-
-        if (!$route_data || is_array($route_data) && empty($route_data["rule"])) {
-            return;
-        }
-
-        $route = new Route();
-        $route->setName(strtolower($controller_name . "_" . $action_name));
-        $route->setController($controller_name);
-        $route->setAction($action_name);
-
-        if (is_string($route_data)) {
-            $route->setRule($prefix . $route_data);
-        }
-
-        if (is_array($route_data)) {
-            $route->setRule($prefix . $route_data["rule"]);
-
-            if (!empty($route_data["name"])) {
-                $route->setName($route_data["name"]);
-            }
-
-            if (!empty($route_data["requirements"])) {
-                $route->setRequirements($route_data["requirements"]);
-            }
-        }
-
-        $this->addRoute($route);
-    }
-
-    private function getControllers($dir): array
-    {
-        $this->loadControllers($dir);
-
-        return array_filter(get_declared_classes(), function ($class_name) {
-            if (substr($class_name, -10) == "Controller") {
-                return $class_name;
-            }
-        });
-    }
-
-    private function loadControllers($dir)
-    {
-        if ($handle = opendir($dir)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry == "." || $entry == "..") continue;
-
-                if (is_dir($dir . "/" . $entry)) {
-                    $this->loadControllers($dir . "/" . $entry);
-                }
-                if (strpos($entry, "Controller.php") > 1) {
-                    include_once $dir . "/" . $entry;
-                }
-            }
-        }
+        $this->addRoutes($routes);
     }
 
 }
