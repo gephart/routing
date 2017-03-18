@@ -74,9 +74,11 @@ class Route
     /**
      * @param string $rule
      */
-    public function setRule(string $rule)
+    public function setRule(string $rule): Route
     {
         $this->rule = $rule;
+
+        return $this;
     }
 
     /**
@@ -90,9 +92,11 @@ class Route
     /**
      * @param string $name
      */
-    public function setName(string $name)
+    public function setName(string $name): Route
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -106,9 +110,11 @@ class Route
     /**
      * @param array $requirements
      */
-    public function setRequirements(array $requirements)
+    public function setRequirements(array $requirements): Route
     {
         $this->requirements = $requirements;
+
+        return $this;
     }
 
     /**
@@ -122,9 +128,11 @@ class Route
     /**
      * @param string $controller
      */
-    public function setController(string $controller)
+    public function setController(string $controller): Route
     {
         $this->controller = $controller;
+
+        return $this;
     }
 
     /**
@@ -138,9 +146,11 @@ class Route
     /**
      * @param string $action
      */
-    public function setAction(string $action)
+    public function setAction(string $action): Route
     {
         $this->action = $action;
+
+        return $this;
     }
 
     /**

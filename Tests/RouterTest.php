@@ -34,13 +34,12 @@ class RouterTest extends \PHPUnit\Framework\TestCase
         /** @var \Gephart\Routing\Router $router */
         $router = $this->container->get(\Gephart\Routing\Router::class);
 
-        $route = new \Gephart\Routing\Route();
-        $route->setName("testing_route");
-        $route->setController("Test");
-        $route->setAction("Test");
-        $route->setRule("/admin/{entity}/{action}");
-
-        $router->addRoute($route);
+        $router->addRoute((new \Gephart\Routing\Route())
+            ->setName("testing_route")
+            ->setController("Test")
+            ->setAction("Test")
+            ->setRule("/admin/{entity}/{action}")
+        );
 
         $url = $router->generateUrl("testing_route", [
             "action" => "post",
