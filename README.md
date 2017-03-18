@@ -9,6 +9,7 @@ Dependencies
  - gephart/annotation >= dev-master
  - gephart/configuration >= dev-master
  - gephart/dependency-injection >= dev-master
+ - gephart/event-manager >= dev-master
  - gephart/request >= dev-master
  - gephart/response >= dev-master
 
