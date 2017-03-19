@@ -13,12 +13,12 @@
   ],
   "require": {
     "php": ">=7.0",
-    "gephart/annotation": "dev-master",
-    "gephart/configuration": "dev-master",
-    "gephart/dependency-injection": "dev-master",
-    "gephart/event-manager": "dev-master",
-    "gephart/request": "dev-master",
-    "gephart/response": "dev-master"
+    "gephart/annotation": "0.2.*",
+    "gephart/configuration": "0.2.*",
+    "gephart/dependency-injection": "0.2.*",
+    "gephart/event-manager": "0.2.*",
+    "gephart/request": "0.2.*",
+    "gephart/response": "0.2.*"
   },
   "autoload": {
     "psr-4": { "Gephart\\Routing\\": "src/" },
