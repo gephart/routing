@@ -17,7 +17,7 @@ use Gephart\Routing\Loader\AnnotationLoader;
 class Router
 {
 
-    const REQUEST_RENDER_EVENT = "router__request_render";
+    const RESPONSE_RENDER_EVENT = "router__response_render";
 
     /**
      * @var RoutingConfiguration
@@ -129,7 +129,7 @@ class Router
             $response = $response->render();
         }
 
-        $event = $this->triggerEvent(self::REQUEST_RENDER_EVENT, [
+        $event = $this->triggerEvent(self::RESPONSE_RENDER_EVENT, [
             "response" => $response
         ]);
 
