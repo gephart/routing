@@ -45,6 +45,11 @@ class Router
     private $routes;
 
     /**
+     * @var Route
+     */
+    private $actual_route;
+
+    /**
      * @var EventManager
      */
     private $event_manager;
@@ -115,6 +120,7 @@ class Router
         }
 
         $route = $this->getMatchedRoute($_route);
+        $this->setActualRoute($route);
 
         $values = $route->getValuesByMatch($_route);
         $controller_name = $route->getController();
@@ -201,6 +207,22 @@ class Router
         $routes = $this->annotation_loader->loadRoutesFromControllers($dir);
 
         $this->addRoutes($routes);
+    }
+
+    /**
+     * @return Route
+     */
+    public function getActualRoute(): Route
+    {
+        return $this->actual_route;
+    }
+
+    /**
+     * @param Route $actual_route
+     */
+    public function setActualRoute(Route $actual_route)
+    {
+        $this->actual_route = $actual_route;
     }
 
 }

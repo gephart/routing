@@ -3,6 +3,8 @@
 namespace Gephart\Routing\Loader;
 
 use Gephart\Annotation\Reader;
+use Gephart\Routing\Exception\NotFoundRouteException;
+use Gephart\Routing\Exception\NotValidRouteException;
 use Gephart\Routing\Route;
 use Gephart\Routing\RouteCollection;
 
@@ -30,11 +32,10 @@ class AnnotationLoader
                     continue;
                 }
 
-                $route = $this->generateRouteFromAnnotation($controller_name, $action->name);
-
-                if ($route) {
-                    $routes[] = $this->generateRouteFromAnnotation($controller_name, $action->name);
-                }
+                try {
+                    $route = $this->generateRouteFromAnnotation($controller_name, $action->name);
+                    $routes[] = $route;
+                } catch (\Exception $e) {}
             }
         }
 
@@ -75,7 +76,7 @@ class AnnotationLoader
         $route_data = $this->reader->get("Route", $controller_name, $action_name);
 
         if (!$route_data || is_array($route_data) && empty($route_data["rule"])) {
-            return null;
+            throw new NotValidRouteException("Router: $controller_name::$action_name hasn't valid route.");
         }
 
         $route = new Route();
