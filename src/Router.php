@@ -193,7 +193,7 @@ class Router
             }
         }
 
-        throw new NotFoundRouteException("Router: Not found route.");
+        throw new NotFoundRouteException("Router: Not found route on '$_route'.");
     }
 
     private function autoload(string $autoload)
