@@ -212,7 +212,7 @@ class Router
     /**
      * @return Route
      */
-    public function getActualRoute(): Route
+    public function getActualRoute()
     {
         return $this->actual_route;
     }
