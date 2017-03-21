@@ -15,7 +15,7 @@ class RouterTest extends \PHPUnit\Framework\TestCase
 
     public function testRouteFromAnnotation()
     {
-        $_GET["_route"] = "/admin/page/t-e_s.t/10/20";
+        $_GET["_route"] = "admin/page/t-e_s.t/10/20";
 
         ob_start();
         /** @var \Gephart\Routing\Router $router */
