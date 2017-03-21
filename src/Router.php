@@ -113,7 +113,7 @@ class Router
 
     public function run()
     {
-        $_route = $this->request->get("_route") ?: "/";
+        $_route = "/" . $this->request->get("_route");
 
         if ($autoload = $this->routing_configuration->get("autoload")) {
             $this->autoload($autoload);
