@@ -17,7 +17,8 @@ use Gephart\Routing\Loader\AnnotationLoader;
 class Router
 {
 
-    const RESPONSE_RENDER_EVENT = "router__response_render";
+    const START_RUN_EVENT = __CLASS__ . "::START_RUN_EVENT";
+    const RESPONSE_RENDER_EVENT = __CLASS__ . "::RESPONSE_RENDER_EVENT";
 
     /**
      * @var RoutingConfiguration
@@ -113,6 +114,8 @@ class Router
 
     public function run()
     {
+        $this->event_manager->trigger(self::START_RUN_EVENT);
+
         $_route = "/" . $this->request->get("_route");
 
         if ($autoload = $this->routing_configuration->get("autoload")) {
