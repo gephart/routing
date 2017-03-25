@@ -154,7 +154,22 @@ class Router
     public function generateUrl(string $route_name, array $parameters = []): string
     {
         $route = $this->getRoute($route_name);
-        return $this->url_generator->generate($route, $parameters);
+        $base_uri = $this->getBaseUri();
+        return $base_uri . $this->url_generator->generate($route, $parameters);
+    }
+
+    public function actualUrl(): string
+    {
+        $base_uri = $this->getBaseUri();
+        return $base_uri . "/" . $this->request->get("_route");
+    }
+
+    public function getBaseUri(): string
+    {
+        if (!empty($_SERVER["HTTP_HOST"])) {
+            return "//".$_SERVER["HTTP_HOST"].str_replace("/index.php","",$_SERVER["SCRIPT_NAME"]);
+        }
+        return "";
     }
 
     private function triggerEvent(string $event_name, array $parameters = [])
