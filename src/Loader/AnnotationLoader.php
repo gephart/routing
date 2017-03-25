@@ -95,6 +95,10 @@ class AnnotationLoader
                 $route->setName($route_data["name"]);
             }
 
+            if (!empty($route_data["priority"])) {
+                $route->setPriority($route_data["priority"]);
+            }
+
             if (!empty($route_data["requirements"])) {
                 $route->setRequirements($route_data["requirements"]);
             }

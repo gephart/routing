@@ -95,15 +95,23 @@ class Router
         }
     }
 
-    public function getRoutes(): RouteCollection
+    public function getRoutes(): array
     {
-        return $this->routes;
+        $routes = (array) $this->routes;
+
+        usort($routes, function (Route $a, Route $b) {
+            return $a->getPriority() >= $b->getPriority() ? false : true;
+        });
+
+        return $routes;
     }
 
     public function getRoute(string $route_name): Route
     {
+        $routes = $this->routes;
+
         /** @var Route $route */
-        foreach ($this->routes as $route) {
+        foreach ($routes as $route) {
             if ($route->getName() === $route_name) {
                 return $route;
             }
@@ -204,8 +212,10 @@ class Router
 
     private function getMatchedRoute(string $_route): Route
     {
+        $routes = $this->getRoutes();
+
         /** @var Route $route */
-        foreach ($this->routes as $route) {
+        foreach ($routes as $route) {
             if ($route->isMatch($_route)) {
                 return $route;
             }

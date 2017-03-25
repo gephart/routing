@@ -22,6 +22,9 @@ class Route
     /** @var string */
     private $regex;
 
+    /** @var int */
+    private $priority = 0;
+
     public function isMatch($subject)
     {
         preg_match("|^".$this->getRegex()."$|", $subject, $matches);
@@ -180,5 +183,21 @@ class Route
                 return "([-\.\w]+)";
             },
             $rule);
+    }
+
+    /**
+     * @return int
+     */
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    /**
+     * @param int $priority
+     */
+    public function setPriority(int $priority)
+    {
+        $this->priority = $priority;
     }
 }
