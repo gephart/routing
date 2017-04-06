@@ -18,6 +18,7 @@ class Router
 {
 
     const START_RUN_EVENT = __CLASS__ . "::START_RUN_EVENT";
+    const BEFORE_CALL_EVENT = __CLASS__ . "::BEFORE_CALL_EVENT";
     const RESPONSE_RENDER_EVENT = __CLASS__ . "::RESPONSE_RENDER_EVENT";
 
     /**
@@ -136,6 +137,11 @@ class Router
         $values = $route->getValuesByMatch($_route);
         $controller_name = $route->getController();
         $action_name = $route->getAction();
+
+        $this->triggerEvent(self::BEFORE_CALL_EVENT, [
+            "controller" => $controller_name,
+            "action" => $action_name
+        ]);
 
         $route_parameters = $this->getRouteParameters($values, $controller_name, $action_name);
 
