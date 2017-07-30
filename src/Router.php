@@ -172,6 +172,13 @@ class Router
         return $base_uri . $this->url_generator->generate($route, $parameters);
     }
 
+    public function redirectTo(...$params): string
+    {
+        $url = $this->generateUrl(...$params);
+        header("location: $url");
+        exit;
+    }
+
     public function actualUrl(): string
     {
         $base_uri = $this->getBaseUri();
