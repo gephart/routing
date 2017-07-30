@@ -17,7 +17,7 @@ class UrlGenerator
                 $match = $matches[1];
 
                 if (empty($parameters[$match])) {
-                    throw new RouteException("Route '{$route_name->getName()}' needed '$match'");
+                    throw new RouteException("Route '{$route->getName()}' needed '$match'");
                 }
 
                 $parameter = $parameters[$match];
