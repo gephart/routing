@@ -6,12 +6,12 @@ Gephart Routing
 Dependencies
 ---
  - PHP >= 7.1
- - gephart/annotation >= dev-master
- - gephart/configuration >= dev-master
- - gephart/dependency-injection >= dev-master
- - gephart/event-manager >= dev-master
- - gephart/request >= dev-master
- - gephart/response >= dev-master
+ - gephart/annotation >= 0.4
+ - gephart/configuration >= 0.4
+ - gephart/dependency-injection >= 0.4
+ - gephart/event-manager >= 0.4
+ - gephart/request >= 0.4
+ - gephart/response >= 0.4
 
 Instalation
 ---
