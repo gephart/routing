@@ -14,6 +14,13 @@ use Gephart\Routing\Exception\RouterException;
 use Gephart\Routing\Generator\UrlGenerator;
 use Gephart\Routing\Loader\AnnotationLoader;
 
+/**
+ * Router
+ *
+ * @package Gephart\Routing
+ * @author Michal Katuščák <michal@katuscak.cz>
+ * @since 0.2
+ */
 class Router
 {
 
@@ -61,6 +68,14 @@ class Router
      */
     private $url_generator;
 
+    /**
+     * @param RoutingConfiguration $routing_configuration
+     * @param Container $container
+     * @param AnnotationLoader $annotation_loader
+     * @param Request $request
+     * @param EventManager $event_manager
+     * @param UrlGenerator $url_generator
+     */
     public function __construct(
         RoutingConfiguration $routing_configuration,
         Container $container,
@@ -80,6 +95,10 @@ class Router
         $this->routes = new RouteCollection();
     }
 
+    /**
+     * @param Route $route
+     * @throws NotValidRouteException
+     */
     public function addRoute(Route $route)
     {
         if (!$route->isValid()) {
@@ -89,6 +108,9 @@ class Router
         $this->routes[] = $route;
     }
 
+    /**
+     * @param RouteCollection $routes
+     */
     public function addRoutes(RouteCollection $routes)
     {
         foreach ($routes as $route) {
@@ -96,6 +118,9 @@ class Router
         }
     }
 
+    /**
+     * @return array
+     */
     public function getRoutes(): array
     {
         $routes = (array) $this->routes;
@@ -107,6 +132,11 @@ class Router
         return $routes;
     }
 
+    /**
+     * @param string $route_name
+     * @return Route
+     * @throws NotFoundRouteException
+     */
     public function getRoute(string $route_name): Route
     {
         $routes = $this->routes;
@@ -121,6 +151,9 @@ class Router
         throw new NotFoundRouteException("Router: Not found route '$route_name'.");
     }
 
+    /**
+     * @throws RouterException
+     */
     public function run()
     {
         $this->event_manager->trigger(self::START_RUN_EVENT);
@@ -165,6 +198,11 @@ class Router
         echo $response;
     }
 
+    /**
+     * @param string $route_name
+     * @param array $parameters
+     * @return string
+     */
     public function generateUrl(string $route_name, array $parameters = []): string
     {
         $route = $this->getRoute($route_name);
@@ -172,6 +210,12 @@ class Router
         return $base_uri . $this->url_generator->generate($route, $parameters);
     }
 
+    /**
+     * @since 0.3
+     *
+     * @param array ...$params
+     * @return string
+     */
     public function redirectTo(...$params): string
     {
         $url = $this->generateUrl(...$params);
@@ -179,12 +223,18 @@ class Router
         exit;
     }
 
+    /**
+     * @return string
+     */
     public function actualUrl(): string
     {
         $base_uri = $this->getBaseUri();
         return $base_uri . "/" . $this->request->get("_route");
     }
 
+    /**
+     * @return string
+     */
     public function getBaseUri(): string
     {
         if (!empty($_SERVER["HTTP_HOST"])) {
@@ -193,6 +243,11 @@ class Router
         return "";
     }
 
+    /**
+     * @param string $event_name
+     * @param array $parameters
+     * @return Event
+     */
     private function triggerEvent(string $event_name, array $parameters = [])
     {
         $event = new Event();
@@ -204,6 +259,13 @@ class Router
         return $event;
     }
 
+    /**
+     * @param array $data
+     * @param string $controller_name
+     * @param string $action_name
+     * @return array
+     * @throws RouterException
+     */
     private function getRouteParameters(array $data, string $controller_name, string $action_name): array
     {
         $reflection_class = new \ReflectionClass($controller_name);
@@ -223,6 +285,11 @@ class Router
         return $route_parameters;
     }
 
+    /**
+     * @param string $_route
+     * @return Route
+     * @throws NotFoundRouteException
+     */
     private function getMatchedRoute(string $_route): Route
     {
         $routes = $this->getRoutes();
@@ -237,6 +304,10 @@ class Router
         throw new NotFoundRouteException("Router: Not found route on '$_route'.");
     }
 
+    /**
+     * @param string $autoload
+     * @throws RouterException
+     */
     private function autoload(string $autoload)
     {
         $dir = $this->routing_configuration->getDirectory() . "/../" . $autoload;

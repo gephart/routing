@@ -2,6 +2,13 @@
 
 namespace Gephart\Routing;
 
+/**
+ * Route
+ *
+ * @package Gephart\Routing
+ * @author Michal Katuščák <michal@katuscak.cz>
+ * @since 0.2
+ */
 class Route
 {
     /** @var string */
@@ -25,7 +32,11 @@ class Route
     /** @var int */
     private $priority = 0;
 
-    public function isMatch($subject)
+    /**
+     * @param $subject
+     * @return bool
+     */
+    public function isMatch(string $subject)
     {
         preg_match("|^".$this->getRegex()."$|", $subject, $matches);
 
@@ -35,6 +46,10 @@ class Route
         return false;
     }
 
+    /**
+     * @param $subject
+     * @return array
+     */
     public function getValuesByMatch($subject)
     {
         $rule = $this->getRule();
@@ -53,6 +68,9 @@ class Route
         return array_combine($keys, $values);
     }
 
+    /**
+     * @return bool
+     */
     public function isValid()
     {
         if (
@@ -76,6 +94,7 @@ class Route
 
     /**
      * @param string $rule
+     * @return Route
      */
     public function setRule(string $rule): Route
     {
@@ -94,6 +113,7 @@ class Route
 
     /**
      * @param string $name
+     * @return Route
      */
     public function setName(string $name): Route
     {
@@ -112,6 +132,7 @@ class Route
 
     /**
      * @param array $requirements
+     * @return Route
      */
     public function setRequirements(array $requirements): Route
     {
@@ -130,6 +151,7 @@ class Route
 
     /**
      * @param string $controller
+     * @return Route
      */
     public function setController(string $controller): Route
     {
@@ -148,6 +170,7 @@ class Route
 
     /**
      * @param string $action
+     * @return Route
      */
     public function setAction(string $action): Route
     {

@@ -5,8 +5,20 @@ namespace Gephart\Routing\Generator;
 use Gephart\Routing\Exception\RouteException;
 use Gephart\Routing\Route;
 
+/**
+ * URL generator
+ *
+ * @package Gephart\Routing\Generator
+ * @author Michal Katuščák <michal@katuscak.cz>
+ * @since 0.2
+ */
 class UrlGenerator
 {
+    /**
+     * @param Route $route
+     * @param array $parameters
+     * @return string
+     */
     public function generate(Route $route, array $parameters = []): string
     {
         $rule = $route->getRule();

@@ -8,6 +8,13 @@ use Gephart\Routing\Exception\NotValidRouteException;
 use Gephart\Routing\Route;
 use Gephart\Routing\RouteCollection;
 
+/**
+ * Annotation loader
+ *
+ * @package Gephart\Routing\Loader
+ * @author Michal Katuščák <michal@katuscak.cz>
+ * @since 0.2
+ */
 class AnnotationLoader
 {
     /**
@@ -15,11 +22,18 @@ class AnnotationLoader
      */
     private $reader;
 
+    /**
+     * @param Reader $reader
+     */
     public function __construct(Reader $reader)
     {
         $this->reader = $reader;
     }
 
+    /**
+     * @param string $dir
+     * @return RouteCollection
+     */
     public function loadRoutesFromControllers(string $dir): RouteCollection
     {
         $routes = new RouteCollection();
@@ -42,6 +56,10 @@ class AnnotationLoader
         return $routes;
     }
 
+    /**
+     * @param string $dir
+     * @return array
+     */
     private function getControllers(string $dir): array
     {
         $this->loadControllers($dir);
@@ -53,6 +71,9 @@ class AnnotationLoader
         });
     }
 
+    /**
+     * @param string $dir
+     */
     private function loadControllers(string $dir)
     {
         if ($handle = opendir($dir)) {
@@ -70,6 +91,12 @@ class AnnotationLoader
         }
     }
 
+    /**
+     * @param string $controller_name
+     * @param string $action_name
+     * @return Route
+     * @throws NotValidRouteException
+     */
     private function generateRouteFromAnnotation(string $controller_name, string $action_name): Route
     {
         $prefix = $this->reader->get("RoutePrefix", $controller_name);
