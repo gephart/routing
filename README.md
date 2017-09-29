@@ -7,6 +7,7 @@ Dependencies
 ---
  - PHP >= 7.1
  - gephart/annotation >= 0.4
+ - gephart/collections = dev-master
  - gephart/configuration >= 0.4
  - gephart/dependency-injection >= 0.4
  - gephart/event-manager >= 0.4
