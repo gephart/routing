@@ -48,7 +48,7 @@ class AnnotationLoader
 
                 try {
                     $route = $this->generateRouteFromAnnotation($controller_name, $action->name);
-                    $routes[] = $route;
+                    $routes->add($route);
                 } catch (\Exception $e) {}
             }
         }

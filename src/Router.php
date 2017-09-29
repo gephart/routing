@@ -20,6 +20,7 @@ use Gephart\Routing\Loader\AnnotationLoader;
  * @package Gephart\Routing
  * @author Michal Katuščák <michal@katuscak.cz>
  * @since 0.2
+ * @since 0.5 - Implements Gephart\Collections\Collection
  */
 class Router
 {
@@ -97,39 +98,26 @@ class Router
 
     /**
      * @param Route $route
-     * @throws NotValidRouteException
      */
     public function addRoute(Route $route)
     {
-        if (!$route->isValid()) {
-            throw new NotValidRouteException("Route is not valid.");
-        }
-
-        $this->routes[] = $route;
+        $this->routes->add($route);
     }
 
     /**
-     * @param RouteCollection $routes
+     * @param Route[] $routes
      */
-    public function addRoutes(RouteCollection $routes)
+    public function addRoutes(array $routes)
     {
-        foreach ($routes as $route) {
-            $this->addRoute($route);
-        }
+        $this->routes->collect($routes);
     }
 
     /**
-     * @return array
+     * @return RouteCollection
      */
-    public function getRoutes(): array
+    public function getRoutes(): RouteCollection
     {
-        $routes = (array) $this->routes;
-
-        usort($routes, function (Route $a, Route $b) {
-            return $a->getPriority() >= $b->getPriority() ? false : true;
-        });
-
-        return $routes;
+        return $this->routes->sortRoutes();
     }
 
     /**
@@ -139,30 +127,23 @@ class Router
      */
     public function getRoute(string $route_name): Route
     {
-        $routes = $this->routes;
+        $routes = $this->routes->sortRoutes()->filter(function(Route $route) use ($route_name) {
+            return $route->getName() === $route_name;
+        })->all();
 
-        /** @var Route $route */
-        foreach ($routes as $route) {
-            if ($route->getName() === $route_name) {
-                return $route;
-            }
+        if (count($routes) > 0) {
+            return $routes[0];
         }
 
         throw new NotFoundRouteException("Router: Not found route '$route_name'.");
     }
 
     /**
-     * @throws RouterException
+     * @since 0.5
      */
-    public function run()
+    private function getResponse()
     {
-        $this->event_manager->trigger(self::START_RUN_EVENT);
-
         $_route = "/" . $this->request->get("_route");
-
-        if ($autoload = $this->routing_configuration->get("autoload")) {
-            $this->autoload($autoload);
-        }
 
         $route = $this->getMatchedRoute($_route);
         $this->setActualRoute($route);
@@ -180,6 +161,22 @@ class Router
 
         $controller = $this->container->get($controller_name);
         $response = $controller->$action_name(...$route_parameters);
+
+        return $response;
+    }
+
+    /**
+     * @throws RouterException
+     */
+    public function run()
+    {
+        $this->event_manager->trigger(self::START_RUN_EVENT);
+
+        if ($autoload = $this->routing_configuration->get("autoload")) {
+            $this->autoload($autoload);
+        }
+
+        $response = $this->getResponse();
 
         if ($response instanceof ResponseInterface) {
             $response = $response->render();
@@ -292,13 +289,12 @@ class Router
      */
     private function getMatchedRoute(string $_route): Route
     {
-        $routes = $this->getRoutes();
+        $routes = $this->routes->sortRoutes()->filter(function(Route $route) use ($_route) {
+            return $route->isMatch($_route);
+        })->all();
 
-        /** @var Route $route */
-        foreach ($routes as $route) {
-            if ($route->isMatch($_route)) {
-                return $route;
-            }
+        if (count($routes) > 0) {
+            return $routes[0];
         }
 
         throw new NotFoundRouteException("Router: Not found route on '$_route'.");
@@ -318,7 +314,7 @@ class Router
 
         $routes = $this->annotation_loader->loadRoutesFromControllers($dir);
 
-        $this->addRoutes($routes);
+        $this->routes->collect($routes->all());
     }
 
     /**
