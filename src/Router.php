@@ -127,7 +127,7 @@ class Router
      */
     public function getRoute(string $route_name): Route
     {
-        $routes = $this->routes->sortRoutes()->filter(function(Route $route) use ($route_name) {
+        $routes = $this->getRoutes()->filter(function(Route $route) use ($route_name) {
             return $route->getName() === $route_name;
         })->all();
 
@@ -289,7 +289,7 @@ class Router
      */
     private function getMatchedRoute(string $_route): Route
     {
-        $routes = $this->routes->sortRoutes()->filter(function(Route $route) use ($_route) {
+        $routes = $this->getRoutes()->filter(function(Route $route) use ($_route) {
             return $route->isMatch($_route);
         })->all();
 
