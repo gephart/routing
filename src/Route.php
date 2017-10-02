@@ -73,8 +73,7 @@ class Route
      */
     public function isValid()
     {
-        if (
-            $this->rule === null
+        if ($this->rule === null
             || $this->name === null
             || $this->controller === null
             || $this->action === null
@@ -205,7 +204,8 @@ class Route
                 }
                 return "([-\.\w]+)";
             },
-            $rule);
+            $rule
+        );
     }
 
     /**

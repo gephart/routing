@@ -2,4 +2,7 @@
 
 namespace Gephart\Routing\Exception;
 
-class NotFoundRouteException extends RouteException {}
+class NotFoundRouteException extends RouteException
+{
+
+}

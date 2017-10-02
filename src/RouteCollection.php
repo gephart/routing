@@ -44,5 +44,4 @@ final class RouteCollection extends Collection
             return $a->getPriority() < $b->getPriority();
         });
     }
-
 }

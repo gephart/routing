@@ -49,7 +49,8 @@ class AnnotationLoader
                 try {
                     $route = $this->generateRouteFromAnnotation($controller_name, $action->name);
                     $routes->add($route);
-                } catch (\Exception $e) {}
+                } catch (\Exception $e) {
+                }
             }
         }
 
@@ -78,7 +79,9 @@ class AnnotationLoader
     {
         if ($handle = opendir($dir)) {
             while (false !== ($entry = readdir($handle))) {
-                if ($entry == "." || $entry == "..") continue;
+                if ($entry == "." || $entry == "..") {
+                    continue;
+                }
 
                 if (is_dir($dir . "/" . $entry)) {
                     $this->loadControllers($dir . "/" . $entry);

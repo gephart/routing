@@ -2,4 +2,7 @@
 
 namespace Gephart\Routing\Exception;
 
-class RouteException extends \Exception {}
+class RouteException extends \Exception
+{
+
+}

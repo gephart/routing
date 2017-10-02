@@ -37,7 +37,8 @@ class UrlGenerator
                 unset($parameters[$match]);
                 return $parameter;
             },
-            $rule);
+            $rule
+        );
 
         if (empty($parameters)) {
             return $url;
