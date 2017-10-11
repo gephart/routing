@@ -5,29 +5,28 @@ namespace Gephart\Routing;
 use Gephart\DependencyInjection\Container;
 use Gephart\EventManager\Event;
 use Gephart\EventManager\EventManager;
-use Gephart\Request\Request;
-use Gephart\Response\ResponseInterface;
 use Gephart\Routing\Configuration\RoutingConfiguration;
 use Gephart\Routing\Exception\NotFoundRouteException;
-use Gephart\Routing\Exception\NotValidRouteException;
 use Gephart\Routing\Exception\RouterException;
 use Gephart\Routing\Generator\UrlGenerator;
 use Gephart\Routing\Loader\AnnotationLoader;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Router
  *
  * @package Gephart\Routing
  * @author Michal Katuščák <michal@katuscak.cz>
+ *
  * @since 0.2
- * @since 0.5 - Implements Gephart\Collections\Collection
+ * @since 0.5 - Implements Gephart\Collections and Gephart\Htp
  */
 class Router
 {
 
     const START_RUN_EVENT = __CLASS__ . "::START_RUN_EVENT";
     const BEFORE_CALL_EVENT = __CLASS__ . "::BEFORE_CALL_EVENT";
-    const RESPONSE_RENDER_EVENT = __CLASS__ . "::RESPONSE_RENDER_EVENT";
 
     /**
      * @var RoutingConfiguration
@@ -45,7 +44,7 @@ class Router
     private $annotation_loader;
 
     /**
-     * @var Request
+     * @var ServerRequestInterface
      */
     private $request;
 
@@ -73,7 +72,7 @@ class Router
      * @param RoutingConfiguration $routing_configuration
      * @param Container $container
      * @param AnnotationLoader $annotation_loader
-     * @param Request $request
+     * @param ServerRequestInterface $request
      * @param EventManager $event_manager
      * @param UrlGenerator $url_generator
      */
@@ -81,7 +80,7 @@ class Router
         RoutingConfiguration $routing_configuration,
         Container $container,
         AnnotationLoader $annotation_loader,
-        Request $request,
+        ServerRequestInterface $request,
         EventManager $event_manager,
         UrlGenerator $url_generator
     ) {
@@ -142,7 +141,8 @@ class Router
      */
     private function getResponse()
     {
-        $_route = "/" . $this->request->get("_route");
+        $queryParams = $this->request->getQueryParams();
+        $_route = "/" . (!empty($queryParams["_route"]) ? $queryParams["_route"] : "");
 
         $route = $this->getMatchedRoute($_route);
         $this->setActualRoute($route);
@@ -161,13 +161,19 @@ class Router
         $controller = $this->container->get($controller_name);
         $response = $controller->$action_name(...$route_parameters);
 
+        if (!$response instanceof ResponseInterface) {
+            throw new RouterException(
+                "Router expected Psr\Http\Message\ResponseInterface from $controller_name::$action_name"
+            );
+        }
+
         return $response;
     }
 
     /**
      * @throws RouterException
      */
-    public function run()
+    public function run(): ResponseInterface
     {
         $this->event_manager->trigger(self::START_RUN_EVENT);
 
@@ -177,21 +183,7 @@ class Router
 
         $response = $this->getResponse();
 
-        if ($response instanceof ResponseInterface) {
-            $response = $response->render();
-        }
-
-        $event = $this->triggerEvent(self::RESPONSE_RENDER_EVENT, [
-            "response" => $response
-        ]);
-
-        $response = $event->getParam("response");
-
-        if (!is_string($response)) {
-            throw new RouterException("Router expected valid response from $controller_name::$action_name");
-        }
-
-        echo $response;
+        return $response;
     }
 
     /**
@@ -224,8 +216,11 @@ class Router
      */
     public function actualUrl(): string
     {
+        $queryParams = $this->request->getQueryParams();
+        $_route = "/" . (!empty($queryParams["_route"]) ? $queryParams["_route"] : "");
+
         $base_uri = $this->getBaseUri();
-        return $base_uri . "/" . $this->request->get("_route");
+        return $base_uri . "/" . $_route;
     }
 
     /**
@@ -234,25 +229,9 @@ class Router
     public function getBaseUri(): string
     {
         if (!empty($_SERVER["HTTP_HOST"])) {
-            return "//".$_SERVER["HTTP_HOST"].str_replace("/index.php", "", $_SERVER["SCRIPT_NAME"]);
+            return "//" . $_SERVER["HTTP_HOST"] . str_replace("/index.php", "", $_SERVER["SCRIPT_NAME"]);
         }
         return "";
-    }
-
-    /**
-     * @param string $event_name
-     * @param array $parameters
-     * @return Event
-     */
-    private function triggerEvent(string $event_name, array $parameters = [])
-    {
-        $event = new Event();
-        $event->setName($event_name);
-        $event->setParams($parameters);
-
-        $this->event_manager->trigger($event);
-
-        return $event;
     }
 
     /**
@@ -330,5 +309,16 @@ class Router
     public function setActualRoute(Route $actual_route)
     {
         $this->actual_route = $actual_route;
+    }
+
+    private function triggerEvent($eventName, $params = [])
+    {
+        $event = new Event();
+        $event->setName($eventName);
+        $event->setParams($params);
+
+        $this->event_manager->trigger($event);
+
+        return $event;
     }
 }

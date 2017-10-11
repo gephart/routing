@@ -16,10 +16,9 @@
     "gephart/annotation": "0.4.*",
     "gephart/collections": "dev-master",
     "gephart/configuration": "0.4.*",
-    "gephart/dependency-injection": "0.4.*",
+    "gephart/dependency-injection": "dev-master",
     "gephart/event-manager": "0.4.*",
-    "gephart/request": "0.4.*",
-    "gephart/response": "0.4.*"
+    "gephart/http": "dev-master"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "3.*"

@@ -17,6 +17,11 @@ class TestController
      */
     public function index($limit, $offset, $slug)
     {
-        return $slug . "-" . $limit . "-" . $offset;
+        $body = $slug . "-" . $limit . "-" . $offset;
+
+        $stream = new \Gephart\Http\Stream("php://temp", "rw");
+        $stream->write($body);
+
+        return new \Gephart\Http\Response($stream);
     }
 }
