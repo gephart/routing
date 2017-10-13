@@ -217,7 +217,7 @@ class Router
     public function actualUrl(): string
     {
         $queryParams = $this->request->getQueryParams();
-        $_route = "/" . (!empty($queryParams["_route"]) ? $queryParams["_route"] : "");
+        $_route = !empty($queryParams["_route"]) ? $queryParams["_route"] : "";
 
         $base_uri = $this->getBaseUri();
         return $base_uri . "/" . $_route;
